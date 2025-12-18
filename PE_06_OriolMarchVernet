@@ -1,47 +1,84 @@
 public class PE_06_OriolMarchVernet {
 
     // Constants del joc
-    int boardSize = 63;
-    int minPlayers = 2;
-    int maxPlayers = 4;
+    
+    int boardSize   = 63;
+    int minPlayers  = 2;
+    int maxPlayers  = 4;
 
     // Tipus de caselles
-    int normal = 0;
-    int goose  = 1;
-    int bridge = 2;
-    int inn    = 3;
-    int well   = 4;
-    int labyrinth = 5;
-    int prison = 6;
-    int dice36  = 7; // casella 26
-    int dice45 = 8; // casella 53
-    int death = 9;
-    int garden = 10;
+
+    int normal     = 0;
+    int goose      = 1;
+    int bridge     = 2;
+    int inn        = 3;
+    int well       = 4;
+    int labyrinth  = 5;
+    int prison     = 6;
+    int dice36     = 7;   // casella 26
+    int dice45     = 8;   // casella 53
+    int death      = 9;
+    int garden     = 10;
+
+    // Estat del joc
+
+    boolean gameFinished = false;
 
     // Array per el tauler
-    int[] cellType = new int[boardSize + 1];
-    String[] cellMessage = new String[boardSize + 1];
-    int [] cellDestination = new int[boardSize + 1];
-    int [] cellPenalty = new int[boardSize + 1];
+    
+    int[] cellType        = new int[boardSize + 1];
+    String[] cellMessage  = new String[boardSize + 1];
+    int[] cellDestination = new int[boardSize + 1];
+    int[] cellPenalty     = new int[boardSize + 1];
 
     // Arrays per els jugadors
+
     int playerCount;
     String[] playerNames;
     int[] playerPositions;
     int[] playerBlockedTurns;
-    boolean[] firstRoll;
+    int[] firstRoll;
 
-public static void main(String[] args) {
-    PE_06_OriolMarchVernet p = new PE_06_OriolMarchVernet();
-    p.mainGame();  
+    // Fer una variable torn per controlar el torn dels jugadors,
+    // i fer un bucle amb un for. Variable mesAlt.
 
-}
+    // Main
 
-public void mainGame(){
+    public static void main(String[] args) {
+        PE_06_OriolMarchVernet p = new PE_06_OriolMarchVernet();
+        p.mainGame();
+    }
+
+    // Programa principal
+
+    public void mainGame() {
+
+    }
+
     
-}
+    // Ronda (tots els jugadors fan un torn)
 
-}
+    public void playRound() {
+        for (int turn = 0; turn < playerCount; turn++) {
+            if (gameFinished) {
+                break;
+            }
+            playTurn(turn);
+        }
+    }
 
-// Arrays de 1 dimensió  i 2 dimensió
-// Mètodes per a omplir, mostrar, cercar, ordenar...
+    // Torn d'un jugador concret
+    
+    public void playTurn(int turn) {
+        if (playerBlockedTurns[turn] > 0) {
+            playerBlockedTurns[turn]--;
+            System.out.println(
+                "It is this player " + (turn + 1) + "'s turn: " + playerNames[turn]
+            );
+            return;
+        }
+    }
+
+    // Arrays de 1 dimensió i 2 dimensió
+    // Mètodes per a omplir, mostrar, cercar, ordenar...
+}
