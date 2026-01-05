@@ -133,11 +133,11 @@ public class PE_06_OriolMarchVernet {
         // Mort (58): inici
         cellType[58] = DEATH;
         cellDestination[58] = 0;
-        cellMessage[58] = "Muerte: vuelves al inicio.";
+        cellMessage[58] = "Mort: Tornes al inici.";
 
         // Jardí (63): fi
         cellType[63] = GARDEN;
-        cellMessage[63] = "Jardín de la Oca. Has arribat!";
+        cellMessage[63] = "Jardí de l'Oca. Has arribat!";
 
         // Primera tirada especial
         cellType[26] = DICE36;
@@ -196,7 +196,160 @@ public class PE_06_OriolMarchVernet {
                     return;
                 }
             }
+        }   
+        
+            isFirstTurn[turn] = false;
+
+            int steps = d1 + d2;
+            movePlayerWithBounce(turn, steps);
+
+            extraRoll = applyCellEffect(turn);
+
+            // si ha quedat bloquejat, s'acaba la cadena de tirades
+            if (playerBlockedTurns[turn] > 0) extraRoll = false;
+
+            checkWin(turn);
+
+        } while (extraRoll && !gameFinished);
+    }
+
+    private void checkWin(int turn) {
+        if (playerPositions[turn] == 63) {
+            System.out.println("Ha guanyat " + playerNames[turn] + "!!");
+            gameFinished = true;
         }
+    }
+
+    // Moviment amb “rebote”.
+    public void movePlayerWithBounce(int turn, int steps) {
+        int oldPos = playerPositions[turn];
+        int newPos = oldPos + steps;
+
+        if (newPos > 63) {
+            int overshoot = newPos - 63;
+            newPos = 63 - overshoot;
+            System.out.println("T'has passat! Rebot i tornes enrere.");
+        }
+
+        playerPositions[turn] = newPos;
+        System.out.println("Avances fins la casella " + newPos + ".");
+    }
+
+    // Retorna true si cal “tornar a tirar”
+    public boolean applyCellEffect(int turn) {
+        int pos = playerPositions[turn];
+        int type = cellType[pos];
+
+        if (!cellMessage[pos].equals("")) {
+            System.out.println("Casella " + pos + ": " + cellMessage[pos]);
+        }
+
+        if (type == GOOSE) {
+            int next = (pos == 59) ? 63 : findNextGoose(pos);
+            if (next != -1) {
+                playerPositions[turn] = next;
+                System.out.println("De oca a oca... vas a la casella " + next + ".");
+                return true; // torna a tirar
+            }
+            return false;
+
+        } else if (type == BRIDGE) {
+            playerPositions[turn] = (pos == 6) ? 12 : 6;
+            System.out.println("Pont! Ara ets a la casella " + playerPositions[turn] + ".");
+            return true; // torna a tirar
+
+        } else if (type == INN || type == PRISON) {
+            playerBlockedTurns[turn] = cellPenalty[pos];
+            System.out.println("Penalització: perds " + cellPenalty[pos] + " torn(s).");
+            return false;
+
+        } else if (type == WELL) {
+            // Si hi havia algú al pou, surt quan un altre cau
+            if (wellPrisoner != -1 && wellPrisoner != turn) {
+                System.out.println("El jugador " + playerNames[wellPrisoner] + " surt del pou!");
+                playerBlockedTurns[wellPrisoner] = 0;
+            }
+            wellPrisoner = turn;
+            playerBlockedTurns[turn] = cellPenalty[pos];
+            System.out.println("Et quedes " + cellPenalty[pos] + " torn(s) bloquejat.");
+            return false;
+
+        } else if (type == LABYRINTH || type == DEATH) {
+            int dest = cellDestination[pos];
+            playerPositions[turn] = dest;
+            System.out.println("Efecte: vas a la casella " + dest + ".");
+            return false;
+        }
+
+        return false;
+    }
+
+    public int findNextGoose(int pos) {
+        int[] oques = {5, 9, 14, 18, 23, 27, 32, 36, 41, 45, 50, 54, 59};
+        for (int i = 0; i < oques.length; i++) {
+            if (oques[i] > pos) return oques[i];
+        }
+        return -1;
+    }
+
+    private boolean isCombo(int d1, int d2, int a, int b) {
+        return (d1 == a && d2 == b) || (d1 == b && d2 == a);
+    }
+
+    public void waitForTiro() {
+        String txt = "";
+        System.out.println("Escriu 'tiro' per tirar els daus.");
+        while (!txt.equalsIgnoreCase("tiro")) {
+            System.out.print(">> ");
+            txt = sc.nextLine();
+        }
+    }
+
+    public int rollDie() {
+        return (int)(Math.random() * 6) + 1;
+    }
+
+    // Lectura d'enters amb control d'errors (estil PE_05)
+    public int readInt(Scanner sc, String message) {
+        int value = 0;
+        boolean ok = false;
+
+        while (!ok) {
+            System.out.print(message);
+            try {
+                value = sc.nextInt();
+                sc.nextLine(); // neteja buffer
+                ok = true;
+            } catch (InputMismatchException e) {
+                System.out.println("Error: introdueix un número enter.");
+                sc.nextLine();
+            }
+        }
+        return value;
+    }
+
+    public int readIntRange(String message, int min, int max) {
+        int value = readInt(sc, message);
+        while (value < min || value > max) {
+            System.out.println("Valor no vàlid. Ha d'estar entre " + min + " i " + max + ".");
+            value = readInt(sc, message);
+        }
+        return value;
+    }
+
+    public String readNonEmpty(String msg) {
+        String txt = "";
+        while (txt.trim().equals("")) {
+            System.out.print(msg);
+            txt = sc.nextLine();
+            if (txt.trim().equals("")) {
+                System.out.println("No pot estar buit.");
+            }
+        }
+        return txt;
+    }
+
+
     
 
-}
+
