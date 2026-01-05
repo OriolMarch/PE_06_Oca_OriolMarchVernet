@@ -1,43 +1,44 @@
 public class PE_06_OriolMarchVernet {
 
     // Constants del joc
-    
-    int boardSize   = 63;
-    int minPlayers  = 2;
-    int maxPlayers  = 4;
+
+    private final int BOARD_SIZE = 63;
+    private final int MIN_PLAYERS = 2;
+    private final int MAX_PLAYERS = 4;
 
     // Tipus de caselles
+    private final int NORMAL    = 0;
+    private final int GOOSE     = 1;
+    private final int BRIDGE    = 2;
+    private final int INN       = 3;
+    private final int WELL      = 4;
+    private final int LABYRINTH = 5;
+    private final int PRISON    = 6;
+    private final int DICE36    = 7;   // casella 26
+    private final int DICE45    = 8;   // casella 53
+    private final int DEATH     = 9;   // casella 58
+    private final int GARDEN    = 10;  // casella 63
 
-    int normal     = 0;
-    int goose      = 1;
-    int bridge     = 2;
-    int inn        = 3;
-    int well       = 4;
-    int labyrinth  = 5;
-    int prison     = 6;
-    int dice36     = 7;   // casella 26
-    int dice45     = 8;   // casella 53
-    int death      = 9;
-    int garden     = 10;
+    private boolean gameFinished = false;
 
-    // Estat del joc
+    // Tauler
+    private int[] cellType;
+    private String[] cellMessage;
+    private int[] cellDestination;
+    private int[] cellPenalty;
 
-    boolean gameFinished = false;
+    // Jugadors
+    private int playerCount;
+    private String[] playerNames;
+    private int[] playerPositions;
+    private int[] playerBlockedTurns;
+    private boolean[] isFirstTurn;
 
-    // Array per el tauler
-    
-    int[] cellType        = new int[boardSize + 1];
-    String[] cellMessage  = new String[boardSize + 1];
-    int[] cellDestination = new int[boardSize + 1];
-    int[] cellPenalty     = new int[boardSize + 1];
+    // Regla del pou
+    private int wellPrisoner = -1;
 
-    // Arrays per els jugadors
-
-    int playerCount;
-    String[] playerNames;
-    int[] playerPositions;
-    int[] playerBlockedTurns;
-    int[] firstRoll;
+    // Scanner General
+    private Scanner sc = new Scanner(System.in);
 
     // Fer una variable torn per controlar el torn dels jugadors,
     // i fer un bucle amb un for. Variable mesAlt.
@@ -51,34 +52,56 @@ public class PE_06_OriolMarchVernet {
 
     // Programa principal
 
-    public void mainGame() {
+   public void principal() {
+        System.out.println("=== JOC DE L'OCA ===");
+        initGame();
 
-    }
-
-    
-    // Ronda (tots els jugadors fan un torn)
-
-    public void playRound() {
-        for (int turn = 0; turn < playerCount; turn++) {
-            if (gameFinished) {
-                break;
-            }
-            playTurn(turn);
+        while (!gameFinished) {
+            playRound();
         }
+
+        System.out.println("Fi del joc.");
     }
 
-    // Torn d'un jugador concret
-    
-    public void playTurn(int turn) {
-        if (playerBlockedTurns[turn] > 0) {
-            playerBlockedTurns[turn]--;
-            System.out.println(
-                "It is this player " + (turn + 1) + "'s turn: " + playerNames[turn]
-            );
-            return;
+    public void initGame() {
+        playerCount = readIntRange("Introdueix nombre de jugadors (2-4): ", MIN_PLAYERS, MAX_PLAYERS);
+
+        playerNames = new String[playerCount];
+        playerPositions = new int[playerCount];
+        playerBlockedTurns = new int[playerCount];
+        isFirstTurn = new boolean[playerCount];
+
+        for (int i = 0; i < playerCount; i++) {
+            playerNames[i] = readNonEmpty("Nom del jugador " + (i + 1) + ": ");
+            playerPositions[i] = 0;
+            playerBlockedTurns[i] = 0;
+            isFirstTurn[i] = true;
         }
+
+        initBoard();
     }
 
-    // Arrays de 1 dimensió i 2 dimensió
-    // Mètodes per a omplir, mostrar, cercar, ordenar...
+    public void initBoard() {
+        // +1 perquè la posició 63 existeixi tal qual
+        cellType = new int[BOARD_SIZE + 1];
+        cellMessage = new String[BOARD_SIZE + 1];
+        cellDestination = new int[BOARD_SIZE + 1];
+        cellPenalty = new int[BOARD_SIZE + 1];
+
+        for (int i = 0; i < cellType.length; i++) {
+            cellType[i] = NORMAL;
+            cellMessage[i] = "";
+            cellDestination[i] = i;
+            cellPenalty[i] = 0;
+        }
+
+        // Oques
+        int[] oques = {5, 9, 14, 18, 23, 27, 32, 36, 41, 45, 50, 54, 59};
+        for (int i = 0; i < oques.length; i++) {
+            int pos = oques[i];
+            cellType[pos] = GOOSE;
+            cellMessage[pos] = "De oca en oca y tiro porque me toca.";
+        }
+}
+
 }
