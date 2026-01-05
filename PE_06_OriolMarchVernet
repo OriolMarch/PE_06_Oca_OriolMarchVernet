@@ -104,4 +104,99 @@ public class PE_06_OriolMarchVernet {
         }
 }
 
+// Ponts 6 - 12
+        cellType[6] = BRIDGE;
+        cellType[12] = BRIDGE;
+        cellMessage[6] = "De puente a puente y tiro porque me lleva la corriente!";
+        cellMessage[12] = "De puente a puente y tiro porque me lleva la corriente!";
+
+        // (19): 1 torn
+        cellType[19] = INN;
+        cellPenalty[19] = 1;
+        cellMessage[19] = "Fonda: perds 1 torn.";
+
+        // Pou (31): 2 torns + regla especial
+        cellType[31] = WELL;
+        cellPenalty[31] = 2;
+        cellMessage[31] = "Pou: quedes atrapat fins que hi caigui algú altre.";
+
+        // Laberint (42): torna a 39
+        cellType[42] = LABYRINTH;
+        cellDestination[42] = 39;
+        cellMessage[42] = "Laberint: retrocedeixes a la 39.";
+
+        // Presó (52): 3 torns
+        cellType[52] = PRISON;
+        cellPenalty[52] = 3;
+        cellMessage[52] = "Presó: perds 3 torns.";
+
+        // Mort (58): inici
+        cellType[58] = DEATH;
+        cellDestination[58] = 0;
+        cellMessage[58] = "Muerte: vuelves al inicio.";
+
+        // Jardí (63): fi
+        cellType[63] = GARDEN;
+        cellMessage[63] = "Jardín de la Oca. Has arribat!";
+
+        // Primera tirada especial
+        cellType[26] = DICE36;
+        cellType[53] = DICE45;
+    }
+
+    public void playRound() {
+        for (int turn = 0; turn < playerCount; turn++) {
+            if (gameFinished) break;
+            playTurn(turn);
+        }
+    }
+
+    public void playTurn(int turn) {
+        System.out.println("----------------------------------");
+        System.out.println("Torn del jugador " + (turn + 1) + ": " + playerNames[turn]);
+
+        // Si està bloquejat
+        if (playerBlockedTurns[turn] > 0) {
+            playerBlockedTurns[turn]--;
+            System.out.println("Bloquejat. Torns restants: " + playerBlockedTurns[turn]);
+            return;
+        }
+
+        boolean extraRoll;
+        do {
+            extraRoll = false;
+
+            waitForTiro();
+
+            int d1 = rollDie();
+            int d2 = 0;
+
+            if (playerPositions[turn] < 60) {
+                d2 = rollDie();
+                System.out.println("Has obtingut " + d1 + " i " + d2 + " = " + (d1 + d2));
+            } else {
+                System.out.println("Has obtingut " + d1);
+            }
+
+            // Regla especial: primera tirada (només a inici i amb 2 daus)
+            if (isFirstTurn[turn] && playerPositions[turn] == 0 && d2 != 0) {
+                if (isCombo(d1, d2, 3, 6)) {
+                    System.out.println("De dado a dado y tiro porque me ha tocado. Vas a la 26!");
+                    playerPositions[turn] = 26;
+                    isFirstTurn[turn] = false;
+                    extraRoll = applyCellEffect(turn); // per si profe vol cadena
+                    checkWin(turn);
+                    return;
+                } else if (isCombo(d1, d2, 4, 5)) {
+                    System.out.println("De dado a dado y tiro porque me ha tocado. Vas a la 53!");
+                    playerPositions[turn] = 53;
+                    isFirstTurn[turn] = false;
+                    extraRoll = applyCellEffect(turn);
+                    checkWin(turn);
+                    return;
+                }
+            }
+        }
+    
+
 }
