@@ -348,8 +348,3 @@ public class PE_06_OriolMarchVernet {
         }
         return txt;
     }
-
-
-    
-
-
